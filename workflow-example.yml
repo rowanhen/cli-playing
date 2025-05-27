@@ -41,7 +41,7 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           # Install the package globally or use npx
-          npx @super-secret-test-org/creating-npm-packages
+          npx @super-secret-test-org/simple-versioning
 
       # Option 2: Use with custom options
       - name: Release with custom options (CLI)
@@ -51,7 +51,7 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           # Skip GitHub releases, only do NPM
-          npx @super-secret-test-org/creating-npm-packages --skip-github
+          npx @super-secret-test-org/simple-versioning --skip-github
 
   # Separate job for dry-run preview
   preview:
@@ -74,10 +74,10 @@ jobs:
       - name: Preview release
         run: |
           echo "🔍 Release Preview:"
-          npx @super-secret-test-org/creating-npm-packages analyze
+          npx @super-secret-test-org/simple-versioning analyze
           echo ""
           echo "🚀 Full dry-run:"
-          npx @super-secret-test-org/creating-npm-packages --dry-run
+          npx @super-secret-test-org/simple-versioning --dry-run
 
   # Example of programmatic usage in a custom script
   custom-release:
@@ -97,7 +97,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-          npm install @super-secret-test-org/creating-npm-packages
+          npm install @super-secret-test-org/simple-versioning
 
       - name: Custom release script
         env:
@@ -106,7 +106,7 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           cat > custom-release.js << 'EOF'
-          import { ReleaseAutomation } from '@super-secret-test-org/creating-npm-packages';
+          import { ReleaseAutomation } from '@super-secret-test-org/simple-versioning';
 
           async function customRelease() {
             const automation = new ReleaseAutomation({

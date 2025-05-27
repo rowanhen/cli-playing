@@ -1,5 +1,5 @@
 {
-  "name": "@super-secret-test-org/creating-npm-packages",
+  "name": "@super-secret-test-org/simple-versioning",
   "version": "1.1.0",
   "description": "TypeScript release automation toolkit with conventional commits, semantic versioning, and automated publishing",
   "type": "module",
@@ -49,12 +49,12 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rowanhen/cli-playing.git"
+    "url": "https://github.com/rowanhen/simple-versioning.git"
   },
   "bugs": {
-    "url": "https://github.com/rowanhen/cli-playing/issues"
+    "url": "https://github.com/rowanhen/simple-versioning/issues"
   },
-  "homepage": "https://github.com/rowanhen/cli-playing#readme",
+  "homepage": "https://github.com/rowanhen/simple-versioning#readme",
   "devDependencies": {
     "@types/node": "^22.15.21",
     "typescript": "^5.8.3",

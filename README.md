@@ -17,10 +17,10 @@ A comprehensive TypeScript package for automating semantic releases with convent
 
 ```bash
 # Install globally for CLI usage
-npm install -g @super-secret-test-org/creating-npm-packages
+npm install -g @super-secret-test-org/simple-versioning
 
 # Or install as a dependency
-npm install @super-secret-test-org/creating-npm-packages
+npm install @super-secret-test-org/simple-versioning
 ```
 
 ## Quick Start
@@ -29,25 +29,25 @@ npm install @super-secret-test-org/creating-npm-packages
 
 ```bash
 # Run a full release
-npx @super-secret-test-org/creating-npm-packages
+npx @super-secret-test-org/simple-versioning
 
 # Analyze commits without releasing
-npx @super-secret-test-org/creating-npm-packages analyze
+npx @super-secret-test-org/simple-versioning analyze
 
 # Dry run (no changes made)
-npx @super-secret-test-org/creating-npm-packages --dry-run
+npx @super-secret-test-org/simple-versioning --dry-run
 
 # Skip GitHub release
-npx @super-secret-test-org/creating-npm-packages --skip-github
+npx @super-secret-test-org/simple-versioning --skip-github
 
 # Skip NPM publishing
-npx @super-secret-test-org/creating-npm-packages --skip-npm
+npx @super-secret-test-org/simple-versioning --skip-npm
 ```
 
 ### Programmatic Usage
 
 ```typescript
-import { ReleaseAutomation } from "@super-secret-test-org/creating-npm-packages";
+import { ReleaseAutomation } from "@super-secret-test-org/simple-versioning";
 
 const automation = new ReleaseAutomation();
 
@@ -97,7 +97,7 @@ The package uses sensible defaults based on conventional commits:
 ### Custom Configuration
 
 ```typescript
-import { ReleaseAutomation } from "@super-secret-test-org/creating-npm-packages";
+import { ReleaseAutomation } from "@super-secret-test-org/simple-versioning";
 
 const automation = new ReleaseAutomation({
   types: {
@@ -212,7 +212,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-        run: npx @super-secret-test-org/creating-npm-packages
+        run: npx @super-secret-test-org/simple-versioning
 ```
 
 ### Preview on Pull Requests
@@ -239,7 +239,7 @@ jobs:
       - name: Preview Release
         run: |
           echo "## Release Preview" >> $GITHUB_STEP_SUMMARY
-          npx @super-secret-test-org/creating-npm-packages analyze >> $GITHUB_STEP_SUMMARY
+          npx @super-secret-test-org/simple-versioning analyze >> $GITHUB_STEP_SUMMARY
 ```
 
 ## Environment Variables
@@ -301,7 +301,7 @@ git commit -m "docs: update installation guide"
 Set `DEBUG=1` for verbose logging:
 
 ```bash
-DEBUG=1 npx @super-secret-test-org/creating-npm-packages
+DEBUG=1 npx @super-secret-test-org/simple-versioning
 ```
 
 ## Contributing
