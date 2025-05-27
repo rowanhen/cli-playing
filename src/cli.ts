@@ -17,13 +17,14 @@ Commands:
 
 Options:
   --dry-run         Show what would be done without making changes
-  --skip-npm        Skip NPM publishing
-  --skip-github     Skip GitHub release creation
+  --skip-npm        Skip NPM publishing (useful with --dry-run to bypass auth)
+  --skip-github     Skip GitHub release creation (useful with --dry-run to bypass auth)
   --skip-changelog  Skip changelog generation
 
 Examples:
   release-automation                    # Run full release
   release-automation --dry-run          # Preview what would be released
+  release-automation --dry-run --skip-npm --skip-github  # Preview without auth checks
   release-automation analyze            # Just analyze commits
   release-automation --skip-npm         # Release without NPM publish
     `);
@@ -158,33 +159,55 @@ Examples:
         if (result.steps.publishNpm) {
           console.log(`${stepNumber}️⃣  Publishing to NPM...`);
           if (options.dryRun) {
-            console.log("   🔍 Would publish to NPM");
-            console.log(
-              `   📦 Package: ${result.steps.publishNpm.packageName}@${result.steps.publishNpm.version}`
-            );
-            console.log(`   🏷️  NPM tag: ${result.steps.publishNpm.tag}`);
-            if (result.steps.publishNpm.registry) {
-              console.log(
-                `   🌐 Registry: ${result.steps.publishNpm.registry}`
-              );
+            if (result.steps.publishNpm.skipped) {
+              console.log("   ⏭️  Skipped NPM publishing (--skip-npm)");
+            } else {
+              console.log("   🔍 Would publish to NPM");
             }
-            if (result.steps.publishNpm.description) {
-              console.log(
-                `   📄 Description: ${result.steps.publishNpm.description}`
-              );
+
+            // Show authentication validation
+            if (result.steps.publishNpm.authValidation) {
+              if (result.steps.publishNpm.authValidation.valid) {
+                console.log(
+                  `   ✅ NPM Authentication: Valid (${result.steps.publishNpm.authValidation.username})`
+                );
+              } else if (result.steps.publishNpm.skipped) {
+                console.log(`   ⏭️  NPM Authentication: Skipped`);
+              } else {
+                console.log(`   ❌ NPM Authentication: Failed`);
+              }
             }
-            if (result.steps.publishNpm.files) {
+
+            if (!result.steps.publishNpm.skipped) {
               console.log(
-                `   📁 Files: ${result.steps.publishNpm.files} files`
+                `   📦 Package: ${result.steps.publishNpm.packageName}@${result.steps.publishNpm.version}`
               );
-            }
-            if (result.steps.publishNpm.size) {
-              console.log(`   📊 Size: ${result.steps.publishNpm.size} bytes`);
-            }
-            if (result.steps.publishNpm.publishCommand) {
-              console.log(
-                `   🚀 Command: ${result.steps.publishNpm.publishCommand}`
-              );
+              console.log(`   🏷️  NPM tag: ${result.steps.publishNpm.tag}`);
+              if (result.steps.publishNpm.registry) {
+                console.log(
+                  `   🌐 Registry: ${result.steps.publishNpm.registry}`
+                );
+              }
+              if (result.steps.publishNpm.description) {
+                console.log(
+                  `   📄 Description: ${result.steps.publishNpm.description}`
+                );
+              }
+              if (result.steps.publishNpm.files) {
+                console.log(
+                  `   📁 Files: ${result.steps.publishNpm.files} files`
+                );
+              }
+              if (result.steps.publishNpm.size) {
+                console.log(
+                  `   📊 Size: ${result.steps.publishNpm.size} bytes`
+                );
+              }
+              if (result.steps.publishNpm.publishCommand) {
+                console.log(
+                  `   🚀 Command: ${result.steps.publishNpm.publishCommand}`
+                );
+              }
             }
           } else {
             console.log(
@@ -198,19 +221,37 @@ Examples:
         if (result.steps.createGithubRelease) {
           console.log(`${stepNumber}️⃣  Creating GitHub release...`);
           if (options.dryRun) {
-            console.log("   🔍 Would create GitHub release");
-            console.log(
-              `   🏷️  Release tag: ${result.steps.createGithubRelease.tag}`
-            );
-            if (result.steps.createGithubRelease.repository) {
-              console.log(
-                `   📦 Repository: ${result.steps.createGithubRelease.repository}`
-              );
+            if (result.steps.createGithubRelease.skipped) {
+              console.log("   ⏭️  Skipped GitHub release (--skip-github)");
+            } else {
+              console.log("   🔍 Would create GitHub release");
             }
-            if (result.steps.createGithubRelease.releaseNotes) {
-              console.log("");
-              console.log("   📝 Release notes that would be created:");
-              console.log(result.steps.createGithubRelease.releaseNotes);
+
+            // Show authentication validation
+            if (result.steps.createGithubRelease.authValidation) {
+              if (result.steps.createGithubRelease.authValidation.valid) {
+                console.log("   ✅ GitHub Authentication: Valid");
+              } else if (result.steps.createGithubRelease.skipped) {
+                console.log("   ⏭️  GitHub Authentication: Skipped");
+              } else {
+                console.log("   ❌ GitHub Authentication: Failed");
+              }
+            }
+
+            if (!result.steps.createGithubRelease.skipped) {
+              console.log(
+                `   🏷️  Release tag: ${result.steps.createGithubRelease.tag}`
+              );
+              if (result.steps.createGithubRelease.repository) {
+                console.log(
+                  `   📦 Repository: ${result.steps.createGithubRelease.repository}`
+                );
+              }
+              if (result.steps.createGithubRelease.releaseNotes) {
+                console.log("");
+                console.log("   📝 Release notes that would be created:");
+                console.log(result.steps.createGithubRelease.releaseNotes);
+              }
             }
           } else {
             console.log(
