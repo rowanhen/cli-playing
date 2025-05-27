@@ -1,0 +1,25 @@
+{
+  "name": "@super-secret-test-org/creating-npm-packages",
+  "version": "1.0.0",
+  "description": "Testing package creation",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "release": "tsx scripts/release.ts",
+    "release:dry-run": "tsx scripts/release.ts --dry-run",
+    "bump-version": "tsx scripts/bump-version.ts",
+    "commit-changes": "tsx scripts/commit-changes.ts",
+    "create-tag": "tsx scripts/create-tag.ts",
+    "generate-changelog": "tsx scripts/generate-changelog.ts",
+    "publish-npm": "tsx scripts/publish-npm.ts",
+    "create-github-release": "tsx scripts/create-github-release.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "typescript": "^5.8.3",
+    "tsx": "^4.19.2"
+  }
+}
