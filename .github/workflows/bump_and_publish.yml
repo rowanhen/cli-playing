@@ -10,17 +10,10 @@ jobs:
   bump-and-publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Generate Token
-        uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          app-id: ${{ vars.MARSHMALLOW_CI_APP_ID }}
-          private-key: ${{ secrets.MARSHMALLOW_CI_APP_PRIVATE_KEY }}
-
       - name: Checkout 🛎️
         uses: actions/checkout@v4
         with:
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ secrets.GH_TOKEN }}
           fetch-depth: 0 # Important: fetch all history for git tags
 
       - name: Setup Node 👾
@@ -34,13 +27,13 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config user.name "marshmallow-ci"
-          git config user.email "ci@marshmallow.co"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Generate CHANGELOG.md & Bump & Release 🦫
         env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           # Run the main release script

@@ -192,19 +192,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GH_TOKEN }}
           fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version-file: ".nvmrc"
           registry-url: "https://registry.npmjs.org"
 
       - run: npm ci
 
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: npx @super-secret-test-org/creating-npm-packages
 ```
 
@@ -225,7 +232,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version-file: ".nvmrc"
 
       - run: npm ci
 
@@ -240,8 +247,13 @@ jobs:
 | Variable            | Description                        | Required            |
 | ------------------- | ---------------------------------- | ------------------- |
 | `GITHUB_TOKEN`      | GitHub token for creating releases | For GitHub releases |
-| `NPM_TOKEN`         | NPM token for publishing           | For NPM publishing  |
+| `NODE_AUTH_TOKEN`   | NPM token for publishing           | For NPM publishing  |
 | `GITHUB_REPOSITORY` | Repository in format `owner/repo`  | For GitHub releases |
+
+**Required Secrets:**
+
+- `GH_TOKEN`: Personal Access Token with `repo` and `write:packages` permissions
+- `NPM_TOKEN`: NPM authentication token for publishing
 
 ## Conventional Commits
 
