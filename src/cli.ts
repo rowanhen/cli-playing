@@ -110,11 +110,6 @@ Examples:
               console.log("   📝 Changelog entry that would be added:");
               console.log(result.steps.generateChangelog.changelogEntry);
             }
-            if (result.steps.generateChangelog.changelogPreview) {
-              console.log("");
-              console.log("   📄 Updated CHANGELOG.md preview:");
-              console.log(result.steps.generateChangelog.changelogPreview);
-            }
           } else {
             console.log("   ✅ Updated CHANGELOG.md");
           }
