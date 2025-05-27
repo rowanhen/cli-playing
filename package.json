@@ -1,9 +1,32 @@
 {
   "name": "@super-secret-test-org/creating-npm-packages",
-  "version": "1.0.0",
-  "description": "Testing package creation",
-  "main": "index.js",
+  "version": "1.1.0",
+  "description": "TypeScript release automation toolkit with conventional commits, semantic versioning, and automated publishing",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./cli": {
+      "import": "./dist/cli.js",
+      "require": "./dist/cli.js",
+      "types": "./dist/cli.d.ts"
+    }
+  },
+  "bin": {
+    "release-automation": "./dist/cli.js"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
     "test": "test",
     "release": "tsx scripts/release.ts",
     "release:dry-run": "tsx scripts/release.ts --dry-run",
@@ -15,11 +38,33 @@
     "create-github-release": "tsx scripts/create-github-release.ts",
     "type-check": "tsc --noEmit"
   },
+  "keywords": [
+    "release",
+    "automation",
+    "semantic-versioning",
+    "conventional-commits",
+    "changelog",
+    "npm-publish",
+    "github-releases",
+    "typescript",
+    "ci-cd"
+  ],
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/release-automation.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/release-automation/issues"
+  },
+  "homepage": "https://github.com/your-org/release-automation#readme",
   "devDependencies": {
     "@types/node": "^22.15.21",
     "typescript": "^5.8.3",
     "tsx": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
