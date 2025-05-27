@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2025-05-27
+
+### Features
+
+- breaking up file
+- modularise everthing
+
 ## [1.2.2] - 2025-05-27
 
 ### Chores
