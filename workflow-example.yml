@@ -1,0 +1,148 @@
+# Example workflow for using the release automation package
+name: Release with Automation Package
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Important: fetch all history for git tags
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Option 1: Use the CLI directly
+      - name: Release (CLI)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          # Install the package globally or use npx
+          npx @super-secret-test-org/creating-npm-packages
+
+      # Option 2: Use with custom options
+      - name: Release with custom options (CLI)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          # Skip GitHub releases, only do NPM
+          npx @super-secret-test-org/creating-npm-packages --skip-github
+
+  # Separate job for dry-run preview
+  preview:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Preview release
+        run: |
+          echo "🔍 Release Preview:"
+          npx @super-secret-test-org/creating-npm-packages analyze
+          echo ""
+          echo "🚀 Full dry-run:"
+          npx @super-secret-test-org/creating-npm-packages --dry-run
+
+  # Example of programmatic usage in a custom script
+  custom-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install @super-secret-test-org/creating-npm-packages
+
+      - name: Custom release script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          cat > custom-release.js << 'EOF'
+          import { ReleaseAutomation } from '@super-secret-test-org/creating-npm-packages';
+
+          async function customRelease() {
+            const automation = new ReleaseAutomation({
+              // Custom configuration
+              types: {
+                feat: { bump: "minor", section: "🚀 Features" },
+                fix: { bump: "patch", section: "🐛 Bug Fixes" },
+                docs: { bump: "patch", section: "📚 Documentation" },
+                perf: { bump: "patch", section: "⚡ Performance" },
+                // Custom types
+                breaking: { bump: "major", section: "💥 Breaking Changes" },
+              }
+            });
+
+            // Analyze first
+            const analysis = await automation.analyzeCommits();
+            console.log('📊 Analysis:', {
+              version: analysis.version,
+              bump: analysis.bump,
+              hasChanges: analysis.hasChanges,
+              changes: Object.keys(analysis.changes)
+            });
+
+            if (analysis.hasChanges) {
+              // Run release with custom options
+              const result = await automation.release({
+                skipNpm: process.env.SKIP_NPM === 'true',
+                skipGithub: process.env.SKIP_GITHUB === 'true',
+              });
+              
+              console.log('✅ Release completed:', result.analysis.version);
+            } else {
+              console.log('ℹ️ No changes to release');
+            }
+          }
+
+          customRelease().catch(console.error);
+          EOF
+
+          node custom-release.js

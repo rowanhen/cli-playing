@@ -1,190 +1,194 @@
-# Release Automation Toolkit
+# TypeScript Release Automation
 
-A comprehensive TypeScript release automation toolkit that handles semantic versioning, conventional commits, changelog generation, NPM publishing, and GitHub releases.
+A comprehensive TypeScript package for automating semantic releases with conventional commits, changelog generation, and NPM publishing.
 
 ## Features
 
-- 🔄 **Semantic Versioning**: Automatic version bumping based on conventional commits
-- 📝 **Conventional Commits**: Parse and analyze commit messages following conventional commit standards
-- 📋 **Changelog Generation**: Automatic CHANGELOG.md generation with categorized changes
-- 📦 **NPM Publishing**: Automated NPM package publishing with proper tagging
-- 🏷️ **Git Tagging**: Automatic git tag creation with release notes
-- 🚀 **GitHub Releases**: Automated GitHub release creation with formatted release notes
-- 🌿 **Branch Support**: Support for main branch releases and feature branch prereleases
-- 🔍 **Dry Run Mode**: Preview what would be released without making changes
-- 🛠️ **Programmatic API**: Use as a library in your own tools
-- 📱 **CLI Interface**: Command-line tool for easy integration
+- 🚀 **Semantic Versioning**: Automatic version bumping based on conventional commits
+- 📝 **Changelog Generation**: Beautiful, categorized changelogs with commit links
+- 📦 **NPM Publishing**: Automated package publishing with prerelease support
+- 🏷️ **Git Tagging**: Automatic tag creation and GitHub releases
+- 🔧 **TypeScript First**: Full TypeScript support with comprehensive type definitions
+- 🎯 **CLI & Programmatic**: Use as a CLI tool or integrate programmatically
+- 🌿 **Branch Support**: Configurable branch restrictions and prerelease handling
+- 🔍 **Dry Run Mode**: Test releases without making changes
 
 ## Installation
 
-### As a CLI Tool (Global)
-
 ```bash
-npm install -g @your-org/release-automation
+# Install globally for CLI usage
+npm install -g @super-secret-test-org/creating-npm-packages
+
+# Or install as a dependency
+npm install @super-secret-test-org/creating-npm-packages
 ```
 
-### As a Library (Local)
+## Quick Start
+
+### CLI Usage
 
 ```bash
-npm install @your-org/release-automation
+# Run a full release
+npx @super-secret-test-org/creating-npm-packages
+
+# Analyze commits without releasing
+npx @super-secret-test-org/creating-npm-packages analyze
+
+# Dry run (no changes made)
+npx @super-secret-test-org/creating-npm-packages --dry-run
+
+# Skip GitHub release
+npx @super-secret-test-org/creating-npm-packages --skip-github
+
+# Skip NPM publishing
+npx @super-secret-test-org/creating-npm-packages --skip-npm
 ```
 
-## CLI Usage
-
-### Basic Commands
-
-```bash
-# Run full release process
-release-automation
-
-# Preview what would be released (dry run)
-release-automation --dry-run
-
-# Just analyze commits
-release-automation analyze
-
-# Release with specific options
-release-automation --skip-npm --skip-github
-```
-
-### CLI Options
-
-- `--dry-run`: Show what would be done without making changes
-- `--skip-npm`: Skip NPM publishing
-- `--skip-github`: Skip GitHub release creation
-- `--skip-changelog`: Skip changelog generation
-
-## Programmatic Usage
-
-### Basic Example
+### Programmatic Usage
 
 ```typescript
-import { ReleaseAutomation } from "@your-org/release-automation";
+import { ReleaseAutomation } from "@super-secret-test-org/creating-npm-packages";
 
 const automation = new ReleaseAutomation();
 
-// Run full release
-const result = await automation.release({
-  dryRun: true,
-  skipNpm: false,
-  skipGithub: false,
-});
-
-console.log("Released version:", result.analysis.version);
-```
-
-### Advanced Example
-
-```typescript
-import {
-  ReleaseAutomation,
-  analyzeCommits,
-  bumpVersion,
-  formatChangelogEntry,
-} from "@your-org/release-automation";
-
-// Use individual functions
-const commits = getCommitsSinceLastTag();
-const analysis = analyzeCommits(commits);
-const newVersion = bumpVersion("1.0.0", analysis.bump, null);
-
-// Use the class for full automation
-const automation = new ReleaseAutomation({
-  // Custom configuration
-  types: {
-    feat: { bump: "minor", section: "Features" },
-    fix: { bump: "patch", section: "Bug Fixes" },
-    // ... more types
-  },
-});
-
-// Analyze what would be released
+// Analyze commits
 const analysis = await automation.analyzeCommits();
-console.log("Would release:", analysis.version);
-console.log("Changes:", analysis.changes);
+console.log(`Next version: ${analysis.version}`);
 
-// Run individual steps
-if (!analysis.error) {
-  await automation.bumpVersion(analysis, false);
-  await automation.generateChangelog(analysis, false);
-  await automation.commitChanges(analysis, false);
-  await automation.createTag(analysis, false);
-  await automation.publishNpm(analysis, false);
-  await automation.createGithubRelease(analysis, false);
+// Run full release
+if (analysis.hasChanges) {
+  const result = await automation.release();
+  console.log(`Released version ${result.analysis.version}`);
 }
 ```
 
 ## Configuration
 
-### Environment Variables
+### Default Configuration
 
-- `GITHUB_TOKEN`: Required for GitHub releases
-- `GITHUB_REPOSITORY`: Required for GitHub releases (format: `owner/repo`)
-- `NODE_AUTH_TOKEN` or `NPM_TOKEN`: Required for NPM publishing
-
-### Custom Configuration
+The package uses sensible defaults based on conventional commits:
 
 ```typescript
-const automation = new ReleaseAutomation({
+{
   types: {
     feat: { bump: "minor", section: "Features" },
     fix: { bump: "patch", section: "Bug Fixes" },
     docs: { bump: "patch", section: "Documentation" },
-    // Hidden types (trigger releases but don't appear in changelog)
-    chore: { bump: "patch", hidden: true },
+    style: { bump: "patch", section: "Styles" },
+    refactor: { bump: "patch", section: "Code Refactoring" },
+    perf: { bump: "patch", section: "Performance Improvements" },
+    test: { bump: "patch", section: "Tests" },
+    build: { bump: "patch", section: "Build System" },
+    ci: { bump: "patch", section: "Continuous Integration" },
+    chore: { bump: "patch", section: "Chores" },
+    revert: { bump: "patch", section: "Reverts" }
   },
   branches: {
-    main: "main",
-    prereleasePattern: /^(feature|fix|chore)\//,
-    prereleasePrefix: "beta",
+    main: { prerelease: false },
+    master: { prerelease: false },
+    develop: { prerelease: "beta" },
+    beta: { prerelease: "beta" },
+    alpha: { prerelease: "alpha" }
   },
-  breakingKeywords: ["BREAKING CHANGE", "BREAKING-CHANGE"],
+  breakingChangeKeywords: ["BREAKING CHANGE", "BREAKING CHANGES"]
+}
+```
+
+### Custom Configuration
+
+```typescript
+import { ReleaseAutomation } from "@super-secret-test-org/creating-npm-packages";
+
+const automation = new ReleaseAutomation({
+  types: {
+    feat: { bump: "minor", section: "🚀 Features" },
+    fix: { bump: "patch", section: "🐛 Bug Fixes" },
+    breaking: { bump: "major", section: "💥 Breaking Changes" },
+  },
+  branches: {
+    main: { prerelease: false },
+    staging: { prerelease: "rc" },
+  },
 });
 ```
 
-## Conventional Commits
+## API Reference
 
-This tool follows the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+### ReleaseAutomation Class
 
-```
-<type>[optional scope]: <description>
+#### Constructor
 
-[optional body]
-
-[optional footer(s)]
+```typescript
+new ReleaseAutomation(config?: Partial<ReleaseConfig>)
 ```
 
-### Supported Types
+#### Methods
 
-- `feat`: New features (minor version bump)
-- `fix`: Bug fixes (patch version bump)
-- `docs`: Documentation changes (patch version bump)
-- `style`: Code style changes (patch version bump)
-- `refactor`: Code refactoring (patch version bump)
-- `perf`: Performance improvements (patch version bump)
-- `test`: Test changes (patch version bump)
-- `chore`: Maintenance tasks (patch version bump, hidden from changelog)
+##### `analyzeCommits(): Promise<CommitAnalysis>`
 
-### Breaking Changes
+Analyzes commits since the last tag and determines version bump.
 
-Breaking changes trigger a major version bump and can be indicated by:
+```typescript
+const analysis = await automation.analyzeCommits();
+// Returns: { version, bump, hasChanges, changes, commits, ... }
+```
 
-1. Adding `!` after the type: `feat!: remove deprecated API`
-2. Adding `BREAKING CHANGE:` in the commit body
+##### `release(options?: ReleaseOptions): Promise<ReleaseResult>`
 
-## GitHub Workflows
+Runs the complete release process.
+
+```typescript
+const result = await automation.release({
+  dryRun: false,
+  skipNpm: false,
+  skipGithub: false,
+});
+```
+
+### Types
+
+#### CommitAnalysis
+
+```typescript
+interface CommitAnalysis {
+  version: string; // Next version number
+  bump: BumpType; // major | minor | patch | prerelease
+  hasChanges: boolean; // Whether there are releasable changes
+  changes: ChangesByType; // Categorized changes
+  commits: ParsedCommit[]; // All commits since last tag
+  currentVersion: string; // Current package version
+  packageName: string; // Package name from package.json
+  branch: string; // Current git branch
+  isPrerelease: boolean; // Whether this is a prerelease
+  prereleaseTag?: string; // Prerelease tag (alpha, beta, etc.)
+}
+```
+
+#### ReleaseOptions
+
+```typescript
+interface ReleaseOptions {
+  dryRun?: boolean; // Don't make actual changes
+  skipNpm?: boolean; // Skip NPM publishing
+  skipGithub?: boolean; // Skip GitHub release creation
+}
+```
+
+## GitHub Actions Integration
 
 ### Basic Workflow
 
 ```yaml
 name: Release
-
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -201,15 +205,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-        run: npx @your-org/release-automation
+        run: npx @super-secret-test-org/creating-npm-packages
 ```
 
-### Dry Run Workflow
+### Preview on Pull Requests
 
 ```yaml
 name: Release Preview
-
 on:
   pull_request:
 
@@ -228,46 +230,81 @@ jobs:
       - run: npm ci
 
       - name: Preview Release
-        run: npx @your-org/release-automation --dry-run
+        run: |
+          echo "## Release Preview" >> $GITHUB_STEP_SUMMARY
+          npx @super-secret-test-org/creating-npm-packages analyze >> $GITHUB_STEP_SUMMARY
 ```
 
-## API Reference
+## Environment Variables
 
-### ReleaseAutomation Class
+| Variable            | Description                        | Required            |
+| ------------------- | ---------------------------------- | ------------------- |
+| `GITHUB_TOKEN`      | GitHub token for creating releases | For GitHub releases |
+| `NODE_AUTH_TOKEN`   | NPM token for publishing           | For NPM publishing  |
+| `GITHUB_REPOSITORY` | Repository in format `owner/repo`  | For GitHub releases |
 
-#### Methods
+## Conventional Commits
 
-- `analyzeCommits()`: Analyze commits and determine release type
-- `bumpVersion(analysis, dryRun)`: Update package.json version
-- `generateChangelog(analysis, dryRun)`: Generate/update CHANGELOG.md
-- `commitChanges(analysis, dryRun)`: Commit release changes
-- `createTag(analysis, dryRun)`: Create git tag
-- `publishNpm(analysis, dryRun)`: Publish to NPM
-- `createGithubRelease(analysis, dryRun)`: Create GitHub release
-- `release(options)`: Run complete release process
+This package follows the [Conventional Commits](https://www.conventionalcommits.org/) specification:
 
-#### Options
+```
+<type>[optional scope]: <description>
 
-```typescript
-interface ReleaseOptions {
-  dryRun?: boolean;
-  skipNpm?: boolean;
-  skipGithub?: boolean;
-  skipChangelog?: boolean;
-  config?: Partial<Config>;
-}
+[optional body]
+
+[optional footer(s)]
 ```
 
-### Utility Functions
+### Examples
 
-- `analyzeCommits(commits)`: Analyze commit messages
-- `bumpVersion(version, bump, prerelease)`: Calculate new version
-- `formatChangelogEntry(version, changes)`: Format changelog entry
-- `formatReleaseNotes(changes)`: Format GitHub release notes
-- `getCommitsSinceLastTag()`: Get commits since last tag
-- `getCurrentBranch()`: Get current git branch
-- `parseCommit(commit)`: Parse conventional commit message
+```bash
+# Feature (minor bump)
+git commit -m "feat: add user authentication"
+
+# Bug fix (patch bump)
+git commit -m "fix: resolve login redirect issue"
+
+# Breaking change (major bump)
+git commit -m "feat!: redesign user API"
+# or
+git commit -m "feat: redesign user API
+
+BREAKING CHANGE: The user API has been completely redesigned"
+
+# Documentation (patch bump)
+git commit -m "docs: update installation guide"
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"No commits found"**: Ensure you have commits since the last tag
+2. **"Branch not allowed"**: Check your branch configuration
+3. **"No GitHub token"**: Set the `GITHUB_TOKEN` environment variable
+4. **"NPM publish failed"**: Verify `NODE_AUTH_TOKEN` and package name
+
+### Debug Mode
+
+Set `DEBUG=1` for verbose logging:
+
+```bash
+DEBUG=1 npx @super-secret-test-org/creating-npm-packages
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feat/new-feature`
+3. Make your changes
+4. Add tests if applicable
+5. Commit using conventional commits
+6. Push and create a pull request
 
 ## License
 
-ISC
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.

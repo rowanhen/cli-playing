@@ -1,5 +1,5 @@
 // Main exports for programmatic usage
-export { ReleaseAutomation } from "./release-automation";
+export { ReleaseAutomation } from "./release-automation.js";
 export * from "./release-lib.js";
 export * from "./types.js";
 

@@ -11,6 +11,7 @@ yalc.lock
 # production
 /build
 /build/**/*
+/dist
 *.tsbuildinfo
 
 # docs
