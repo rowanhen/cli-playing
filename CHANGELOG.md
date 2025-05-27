@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2025-05-27
+
+### Refactors
+
+- undoing NODE_AUTH_TOKEN changes and opting for .npmrc being created in workflow
+
+### Chores
+
+- 1.2.0 [skip ci]
+
 ## [1.2.0] - 2025-05-27
 
 ### Chores
