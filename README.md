@@ -47,9 +47,9 @@ npx @super-secret-test-org/simple-versioning --skip-npm
 ### Programmatic Usage
 
 ```typescript
-import { ReleaseAutomation } from "@super-secret-test-org/simple-versioning";
+import { ReleaseOrchestrator } from "@super-secret-test-org/simple-versioning";
 
-const automation = new ReleaseAutomation();
+const automation = new ReleaseOrchestrator();
 
 // Analyze commits
 const analysis = await automation.analyzeCommits();
@@ -97,9 +97,9 @@ The package uses sensible defaults based on conventional commits:
 ### Custom Configuration
 
 ```typescript
-import { ReleaseAutomation } from "@super-secret-test-org/simple-versioning";
+import { ReleaseOrchestrator } from "@super-secret-test-org/simple-versioning";
 
-const automation = new ReleaseAutomation({
+const automation = new ReleaseOrchestrator({
   types: {
     feat: { bump: "minor", section: "🚀 Features" },
     fix: { bump: "patch", section: "🐛 Bug Fixes" },
@@ -114,12 +114,12 @@ const automation = new ReleaseAutomation({
 
 ## API Reference
 
-### ReleaseAutomation Class
+### ReleaseOrchestrator Class
 
 #### Constructor
 
 ```typescript
-new ReleaseAutomation(config?: Partial<ReleaseConfig>)
+new ReleaseOrchestrator(config?: Partial<ReleaseConfig>)
 ```
 
 #### Methods

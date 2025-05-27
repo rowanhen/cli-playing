@@ -137,6 +137,11 @@ export function analyzeCommits(commits: string[]): CommitAnalysisResult {
   let hasHiddenChanges = false;
 
   for (const commit of commits) {
+    // Skip release commits to prevent infinite loops
+    if (isReleaseCommit(commit)) {
+      continue;
+    }
+
     const parsed = parseCommit(commit);
     if (!parsed) continue;
 
@@ -205,6 +210,28 @@ export function analyzeCommits(commits: string[]): CommitAnalysisResult {
     changes,
     hasOnlyHiddenChanges: Object.keys(changes).length === 0 && hasHiddenChanges,
   };
+}
+
+// Helper function to identify release commits
+export function isReleaseCommit(commit: string): boolean {
+  const subject = commit.trim().split("\n")[0];
+  if (!subject) return false;
+
+  // Check for [skip ci] or [ci skip] patterns
+  if (/\[(skip ci|ci skip)\]/i.test(subject)) {
+    return true;
+  }
+
+  // Check for release commit patterns
+  const releasePatterns = [
+    /^chore\(release\):/,
+    /^release:/,
+    /^bump version/i,
+    /^version bump/i,
+    /^\d+\.\d+\.\d+/, // Starts with version number
+  ];
+
+  return releasePatterns.some((pattern) => pattern.test(subject));
 }
 
 // Bump version

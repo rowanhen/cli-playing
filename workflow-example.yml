@@ -104,10 +104,10 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           cat > custom-release.js << 'EOF'
-          import { ReleaseAutomation } from '@super-secret-test-org/simple-versioning';
+          import { ReleaseOrchestrator } from '@super-secret-test-org/simple-versioning';
 
           async function customRelease() {
-            const automation = new ReleaseAutomation({
+            const automation = new ReleaseOrchestrator({
               // Custom configuration
               types: {
                 feat: { bump: "minor", section: "🚀 Features" },

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { ReleaseAutomation } from "./release-automation.js";
+import { ReleaseOrchestrator } from "./funcs/release-orchestrator.js";
 import type { ReleaseOptions } from "./types.js";
 
 async function main() {
@@ -42,7 +42,7 @@ Examples:
   const command = args.find((arg) => !arg.startsWith("--")) || "release";
 
   try {
-    const automation = new ReleaseAutomation();
+    const automation = new ReleaseOrchestrator();
 
     switch (command) {
       case "analyze":
@@ -76,9 +76,11 @@ Examples:
           releaseAnalysis.commitSubjects.length > 0
         ) {
           console.log("   📋 Commit messages:");
-          releaseAnalysis.commitSubjects.forEach((subject, index) => {
-            console.log(`      ${index + 1}. ${subject}`);
-          });
+          releaseAnalysis.commitSubjects.forEach(
+            (subject: string, index: number) => {
+              console.log(`      ${index + 1}. ${subject}`);
+            }
+          );
         }
         console.log("");
 

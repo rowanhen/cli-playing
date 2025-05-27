@@ -1,6 +1,6 @@
 // Example usage of the release automation package
 import {
-  ReleaseAutomation,
+  ReleaseOrchestrator,
   analyzeCommits,
   getCommitsSinceLastTag,
 } from "./dist/index.js";
@@ -25,10 +25,10 @@ async function example() {
     console.log(`   Error: ${error.message}`);
   }
 
-  console.log("\n2️⃣ Using the ReleaseAutomation class:");
+  console.log("\n2️⃣ Using the ReleaseOrchestrator class:");
 
   // Example 2: Use the class
-  const automation = new ReleaseAutomation();
+  const automation = new ReleaseOrchestrator();
 
   try {
     // Analyze commits
