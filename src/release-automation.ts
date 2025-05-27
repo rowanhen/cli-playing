@@ -412,20 +412,10 @@ export class ReleaseAutomation {
         }
       }
 
-      // For scoped packages, verify organization access
-      if (pkg.name.startsWith("@")) {
-        const scope = pkg.name.split("/")[0];
-        try {
-          // Check if we have access to the organization
-          exec(`npm access list packages ${scope}`);
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
-          throw new Error(
-            `Cannot access organization ${scope}. Ensure your NPM token has access to this organization: ${errorMessage}`
-          );
-        }
-      }
+      // Note: We don't check organization access here because:
+      // 1. It requires admin permissions which most users don't have
+      // 2. The actual publish command will fail if permissions are insufficient
+      // 3. This avoids false negatives for users with publish but not admin rights
     } else if (dryRun) {
       // In dry-run with skipAuth, mark as skipped
       authValidation = {
