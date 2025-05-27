@@ -1,14 +1,13 @@
+import type { AnalysisResult, ReleaseStepResult } from "../types.js";
+import { analyzeCommits } from "../utils/commit-parser.js";
 import {
-  analyzeCommits,
-  bumpVersion,
   getCommitsSinceLastTag,
   getCurrentBranch,
-  getPackageJson,
   getPrereleaseTag,
   isBranchAllowed,
-  savePackageJson,
-} from "../release-lib.js";
-import type { AnalysisResult, ReleaseStepResult } from "../types.js";
+} from "../utils/git.js";
+import { getPackageJson, savePackageJson } from "../utils/package.js";
+import { bumpVersion } from "../utils/version.js";
 
 /**
  * Analyze commits and determine what kind of release should be made

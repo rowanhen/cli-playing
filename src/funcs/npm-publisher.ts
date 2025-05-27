@@ -1,7 +1,8 @@
 import { writeFileSync } from "fs";
 import { homedir } from "os";
-import { exec, getPackageJson } from "../release-lib.js";
 import type { AnalysisResult, ReleaseStepResult } from "../types.js";
+import { getPackageJson } from "../utils/package.js";
+import { exec } from "../utils/shell.js";
 
 /**
  * Publish to NPM

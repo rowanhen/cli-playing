@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from "fs";
-import { formatChangelogEntry } from "../release-lib.js";
 import type { AnalysisResult, ReleaseStepResult } from "../types.js";
+import { formatChangelogEntry } from "../utils/formatting.js";
 
 /**
  * Generate changelog entry

@@ -1,5 +1,5 @@
-import { formatReleaseNotes } from "../release-lib.js";
 import type { AnalysisResult, ReleaseStepResult } from "../types.js";
+import { formatReleaseNotes } from "../utils/formatting.js";
 import { getRepositoryInfo } from "./repository-utils.js";
 
 /**

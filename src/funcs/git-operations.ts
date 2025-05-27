@@ -1,6 +1,6 @@
 import { existsSync } from "fs";
-import { exec } from "../release-lib.js";
 import type { AnalysisResult, ReleaseStepResult } from "../types.js";
+import { exec } from "../utils/shell.js";
 
 /**
  * Commit changes to git

@@ -1,4 +1,4 @@
-import { CONFIG as defaultConfig } from "../release-lib.js";
+import { CONFIG as defaultConfig } from "../config.js";
 import type {
   AnalysisResult,
   Config,
