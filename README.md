@@ -204,7 +204,7 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx @super-secret-test-org/creating-npm-packages
 ```
 
@@ -240,7 +240,7 @@ jobs:
 | Variable            | Description                        | Required            |
 | ------------------- | ---------------------------------- | ------------------- |
 | `GITHUB_TOKEN`      | GitHub token for creating releases | For GitHub releases |
-| `NODE_AUTH_TOKEN`   | NPM token for publishing           | For NPM publishing  |
+| `NPM_TOKEN`         | NPM token for publishing           | For NPM publishing  |
 | `GITHUB_REPOSITORY` | Repository in format `owner/repo`  | For GitHub releases |
 
 ## Conventional Commits
@@ -282,7 +282,7 @@ git commit -m "docs: update installation guide"
 1. **"No commits found"**: Ensure you have commits since the last tag
 2. **"Branch not allowed"**: Check your branch configuration
 3. **"No GitHub token"**: Set the `GITHUB_TOKEN` environment variable
-4. **"NPM publish failed"**: Verify `NODE_AUTH_TOKEN` and package name
+4. **"NPM publish failed"**: Verify `NPM_TOKEN` and package name
 
 ### Debug Mode
 

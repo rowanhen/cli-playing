@@ -290,9 +290,9 @@ export class ReleaseAutomation {
 
     if (!dryRun) {
       // Check for NPM token
-      if (!process.env.NODE_AUTH_TOKEN && !process.env.NPM_TOKEN) {
+      if (!process.env.NPM_TOKEN && !process.env.NPM_TOKEN) {
         throw new Error(
-          "NPM authentication token not found. Set NODE_AUTH_TOKEN or NPM_TOKEN environment variable."
+          "NPM authentication token not found. Set NPM_TOKEN or NPM_TOKEN environment variable."
         );
       }
 
