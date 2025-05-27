@@ -1,5 +1,6 @@
 import { execSync } from "child_process";
 import { existsSync, readFileSync, writeFileSync } from "fs";
+import { homedir } from "os";
 import {
   analyzeCommits,
   bumpVersion,
@@ -365,12 +366,17 @@ export class ReleaseAutomation {
 
     if (!skipAuth) {
       // Check for NPM token (both in dry-run and real run)
-      // Support both NODE_AUTH_TOKEN (GitHub Actions standard) and NPM_TOKEN (fallback)
-      const npmToken = process.env.NODE_AUTH_TOKEN || process.env.NPM_TOKEN;
-      if (!npmToken) {
+      if (!process.env.NPM_TOKEN) {
         throw new Error(
-          "NPM authentication token not found. Set NODE_AUTH_TOKEN or NPM_TOKEN environment variable."
+          "NPM authentication token not found. Set NPM_TOKEN environment variable."
         );
+      }
+
+      // Setup NPM authentication (like semantic-release does)
+      if (!dryRun) {
+        const npmrcPath = homedir() + "/.npmrc";
+        const npmrcContent = `//registry.npmjs.org/:_authToken=${process.env.NPM_TOKEN}`;
+        writeFileSync(npmrcPath, npmrcContent);
       }
 
       // Check if version already exists on NPM (for both dry-run and real run)
