@@ -365,9 +365,9 @@ export class ReleaseAutomation {
 
     if (!skipAuth) {
       // Check for NPM token (both in dry-run and real run)
-      if (!process.env.NPM_TOKEN && !process.env.NPM_TOKEN) {
+      if (!process.env.NPM_TOKEN) {
         throw new Error(
-          "NPM authentication token not found. Set NPM_TOKEN or NPM_TOKEN environment variable."
+          "NPM authentication token not found. Set NPM_TOKEN environment variable."
         );
       }
 
@@ -387,6 +387,45 @@ export class ReleaseAutomation {
         // Throw error for both dry-run and real run if auth fails
         throw new Error(authValidation.error);
       }
+
+      // Check if version already exists on NPM (for both dry-run and real run)
+      try {
+        const viewResult = exec(
+          `npm view ${pkg.name}@${analysis.version} version`
+        );
+        if (viewResult.trim() === analysis.version) {
+          throw new Error(
+            `Version ${analysis.version} of ${pkg.name} already exists on NPM. Cannot publish duplicate version.`
+          );
+        }
+      } catch (error) {
+        // If npm view fails, it likely means the version doesn't exist (which is good)
+        // or there's a network/auth issue. We only care if it succeeds and returns the version.
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        if (!errorMessage.includes("npm ERR! code E404")) {
+          // E404 means version doesn't exist, which is what we want
+          // Any other error might be concerning
+          console.warn(
+            `Warning: Could not check if version exists on NPM: ${errorMessage}`
+          );
+        }
+      }
+
+      // For scoped packages, verify organization access
+      if (pkg.name.startsWith("@")) {
+        const scope = pkg.name.split("/")[0];
+        try {
+          // Check if we have access to the organization
+          exec(`npm access list packages ${scope}`);
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          throw new Error(
+            `Cannot access organization ${scope}. Ensure your NPM token has access to this organization: ${errorMessage}`
+          );
+        }
+      }
     } else if (dryRun) {
       // In dry-run with skipAuth, mark as skipped
       authValidation = {
@@ -397,6 +436,7 @@ export class ReleaseAutomation {
     }
 
     if (!dryRun) {
+      // Use npm publish with explicit tag
       exec(`npm publish --tag ${npmTag}`);
     }
 
@@ -424,6 +464,8 @@ export class ReleaseAutomation {
       publishCommand: `npm publish --tag ${npmTag}`,
       authValidation,
       skipped: skipAuth && dryRun,
+      isScoped: pkg.name.startsWith("@"),
+      scope: pkg.name.startsWith("@") ? pkg.name.split("/")[0] : undefined,
     };
   }
 
