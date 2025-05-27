@@ -210,7 +210,7 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: npx @super-secret-test-org/simple-versioning
 ```
@@ -247,7 +247,7 @@ jobs:
 | Variable            | Description                        | Required            |
 | ------------------- | ---------------------------------- | ------------------- |
 | `GITHUB_TOKEN`      | GitHub token for creating releases | For GitHub releases |
-| `NODE_AUTH_TOKEN`   | NPM token for publishing           | For NPM publishing  |
+| `NPM_TOKEN`         | NPM token for publishing           | For NPM publishing  |
 | `GITHUB_REPOSITORY` | Repository in format `owner/repo`  | For GitHub releases |
 
 **Required Secrets:**

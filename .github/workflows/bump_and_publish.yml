@@ -36,7 +36,7 @@ jobs:
       - name: Generate CHANGELOG.md & Bump & Release 🦫
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           # Run the main release script
