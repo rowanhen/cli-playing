@@ -1,3 +1,4 @@
+import { execSync } from "child_process";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import {
   analyzeCommits,
@@ -19,6 +20,46 @@ import type {
   ReleaseOptions,
   ReleaseStepResult,
 } from "./types.js";
+
+/**
+ * Get repository information from git remote origin
+ */
+function getRepositoryInfo(): {
+  owner: string;
+  repo: string;
+  fullName: string;
+} | null {
+  try {
+    const remoteUrl = execSync("git remote get-url origin", {
+      encoding: "utf8",
+    }).trim();
+
+    // Handle both HTTPS and SSH URLs
+    let match;
+    if (remoteUrl.startsWith("https://github.com/")) {
+      // HTTPS: https://github.com/owner/repo.git
+      match = remoteUrl.match(
+        /https:\/\/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/
+      );
+    } else if (remoteUrl.startsWith("git@github.com:")) {
+      // SSH: git@github.com:owner/repo.git
+      match = remoteUrl.match(/git@github\.com:([^\/]+)\/([^\/]+?)(?:\.git)?$/);
+    }
+
+    if (match) {
+      const [, owner, repo] = match;
+      return {
+        owner,
+        repo,
+        fullName: `${owner}/${repo}`,
+      };
+    }
+  } catch (error) {
+    // Ignore errors, will fall back to environment variable
+  }
+
+  return null;
+}
 
 export class ReleaseAutomation {
   private config: Config;
@@ -332,6 +373,11 @@ export class ReleaseAutomation {
     const tag = `v${analysis.version}`;
     const releaseNotes = formatReleaseNotes(analysis.changes);
 
+    // Get repository info from git remote or environment
+    const repoInfo = getRepositoryInfo();
+    const repository =
+      process.env.GITHUB_REPOSITORY || repoInfo?.fullName || "unknown";
+
     if (!dryRun) {
       if (!process.env.GITHUB_TOKEN) {
         throw new Error(
@@ -339,9 +385,10 @@ export class ReleaseAutomation {
         );
       }
 
-      const repository = process.env.GITHUB_REPOSITORY;
-      if (!repository) {
-        throw new Error("GITHUB_REPOSITORY environment variable is required");
+      if (repository === "unknown") {
+        throw new Error(
+          "Could not determine repository. Set GITHUB_REPOSITORY environment variable or ensure git remote origin is set."
+        );
       }
 
       const releaseData = {
@@ -377,6 +424,7 @@ export class ReleaseAutomation {
         tag,
         url: release.html_url,
         releaseNotes,
+        repository,
       };
     }
 
@@ -388,7 +436,7 @@ export class ReleaseAutomation {
       name: tag,
       prerelease: analysis.isPrerelease || false,
       releaseNotes,
-      repository: process.env.GITHUB_REPOSITORY || "unknown",
+      repository,
     };
   }
 

@@ -23,6 +23,9 @@ jobs:
       - name: Install Dependencies 🔧
         run: npm ci
 
+      - name: Build Package 🏗️
+        run: npm run build
+
       - name: Generate preview 📋
         run: |
           echo "🔍 Running release preview..."
