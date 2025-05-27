@@ -371,23 +371,6 @@ export class ReleaseAutomation {
         );
       }
 
-      // Validate NPM authentication by checking whoami
-      try {
-        const whoami = exec("npm whoami");
-        authValidation = { valid: true, username: whoami.trim(), error: "" };
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        authValidation = {
-          valid: false,
-          username: "",
-          error: `NPM authentication failed: ${errorMessage}`,
-        };
-
-        // Throw error for both dry-run and real run if auth fails
-        throw new Error(authValidation.error);
-      }
-
       // Check if version already exists on NPM (for both dry-run and real run)
       try {
         const viewResult = exec(
