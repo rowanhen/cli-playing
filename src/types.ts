@@ -64,10 +64,50 @@ export interface GitHubRelease {
   id: number;
 }
 
+export interface ReleaseOptions {
+  dryRun?: boolean;
+  skipNpm?: boolean;
+  skipGithub?: boolean;
+  skipChangelog?: boolean;
+  config?: Partial<Config>;
+}
+
 export interface ReleaseStepResult {
   success: boolean;
-  dryRun: boolean;
+  dryRun?: boolean;
   skipped?: boolean;
   reason?: string;
+  error?: string;
+  // Version-related fields
+  oldVersion?: string;
+  newVersion?: string;
+  version?: string;
+  // Changelog fields
+  sections?: string[];
+  changelogEntry?: string;
+  changelogPreview?: string;
+  // Commit fields
+  message?: string;
+  files?: string[];
+  // Tag fields
+  tag?: string;
+  tagMessage?: string;
+  gitCommand?: string;
+  isPrerelease?: boolean;
+  wouldCreate?: boolean;
+  alreadyExists?: boolean;
+  // NPM fields
+  packageName?: string;
+  fullPackageName?: string;
+  registry?: string;
+  description?: string;
+  publishCommand?: string;
+  // GitHub fields
+  name?: string;
+  prerelease?: boolean;
+  releaseNotes?: string;
+  repository?: string;
+  url?: string;
+  // Generic fields
   [key: string]: any;
 }

@@ -64,6 +64,14 @@ function main(): void {
     // Determine if there are visible changes (not just hidden changes)
     const hasChanges = Object.keys(analysis.changes).length > 0;
 
+    // Extract commit subjects for detailed output
+    const commitSubjects = commits
+      .map((commit) => {
+        const lines = commit.trim().split("\n");
+        return lines[0] || "";
+      })
+      .filter((subject) => subject.trim());
+
     const result: AnalysisResult = {
       bump: analysis.bump,
       version: newVersion,
@@ -72,6 +80,12 @@ function main(): void {
       isPrerelease,
       changes: analysis.changes,
       hasOnlyHiddenChanges: analysis.hasOnlyHiddenChanges,
+      // Add detailed information for dry-run output
+      packageName: pkg.name,
+      branch: currentBranch,
+      commitCount: commits.length,
+      commitSubjects,
+      prereleaseTag,
     };
 
     console.log(JSON.stringify(result));

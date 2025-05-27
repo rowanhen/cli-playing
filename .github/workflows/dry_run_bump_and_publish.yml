@@ -27,6 +27,6 @@ jobs:
         run: |
           echo "🔍 Running release preview..."
           echo "================================"
-          node release.js --dry-run
+          npm run release:dry-run
           echo "================================"
           echo "✅ Preview complete!"

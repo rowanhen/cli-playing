@@ -57,6 +57,8 @@ async function main(): Promise<void> {
         prerelease: analysis.isPrerelease,
         bodyLength: body.length,
         sections: analysis.hasChanges ? Object.keys(analysis.changes) : [],
+        releaseNotes: body,
+        repository: process.env.GITHUB_REPOSITORY || "unknown",
       })
     );
     return;

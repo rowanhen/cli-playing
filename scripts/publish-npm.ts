@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { exec } from "./release-lib.js";
+import { exec, getPackageJson } from "./release-lib.js";
 import type { AnalysisResult, PackInfo } from "./types.js";
 
 function main(): void {
@@ -32,6 +32,9 @@ function main(): void {
     throw new Error(analysis.error);
   }
 
+  // Get package info for detailed output
+  const pkg = getPackageJson();
+
   // Determine npm tag
   const npmTag = analysis.isPrerelease ? "next" : "latest";
 
@@ -48,6 +51,12 @@ function main(): void {
         tag: npmTag,
         files: packInfo[0]?.files?.length || "unknown",
         size: packInfo[0]?.size || "unknown",
+        // Add detailed package information
+        packageName: pkg.name,
+        registry: "https://registry.npmjs.org",
+        fullPackageName: `${pkg.name}@${analysis.version}`,
+        publishCommand: `npm publish --tag ${npmTag}`,
+        description: pkg.description || "",
       })
     );
     return;

@@ -82,6 +82,12 @@ async function main(): Promise<void> {
       version: analysis.version,
       sections: Object.keys(analysis.changes),
       wouldInsertAt: insertIndex,
+      // Add the actual changelog content for dry-run visibility
+      changelogEntry: dryRun ? newEntry.trim() : undefined,
+      changelogPreview: dryRun
+        ? lines.slice(0, Math.min(20, lines.length)).join("\n") +
+          (lines.length > 20 ? "\n... (truncated)" : "")
+        : undefined,
     })
   );
 }

@@ -29,7 +29,28 @@ async function main(): Promise<void> {
     const { bump, version, hasChanges, currentVersion } = analysisData;
     console.log(`   Version bump: ${bump}`);
     console.log(`   New version: ${version}`);
-    console.log(`   Has changelog changes: ${hasChanges}\n`);
+    console.log(`   Has changelog changes: ${hasChanges}`);
+
+    if (dryRun && analysisData) {
+      console.log(`\n   📦 Package: ${analysisData.packageName || "unknown"}`);
+      console.log(`   🌿 Branch: ${analysisData.branch || "unknown"}`);
+      console.log(`   📝 Commits analyzed: ${analysisData.commitCount || 0}`);
+
+      if (
+        analysisData.commitSubjects &&
+        analysisData.commitSubjects.length > 0
+      ) {
+        console.log(`   📋 Commit messages:`);
+        analysisData.commitSubjects.forEach((subject, index) => {
+          console.log(`      ${index + 1}. ${subject}`);
+        });
+      }
+
+      if (analysisData.isPrerelease && analysisData.prereleaseTag) {
+        console.log(`   🚧 Prerelease tag: ${analysisData.prereleaseTag}`);
+      }
+    }
+    console.log("");
 
     // Pass analysis data to subsequent scripts via environment variable
     process.env.RELEASE_ANALYSIS = analysis;
@@ -57,8 +78,23 @@ async function main(): Promise<void> {
       if (!dryRun && changelogData.success && !changelogData.skipped)
         completedSteps.push("changelog");
       console.log(
-        `   ${dryRun ? "🔍 Would update" : "✅ Updated"} CHANGELOG.md\n`
+        `   ${dryRun ? "🔍 Would update" : "✅ Updated"} CHANGELOG.md`
       );
+
+      if (dryRun && changelogData.changelogEntry) {
+        console.log(`\n   📝 Changelog entry that would be added:`);
+        console.log(
+          `   ${changelogData.changelogEntry.split("\n").join("\n   ")}`
+        );
+
+        if (changelogData.changelogPreview) {
+          console.log(`\n   📄 Updated CHANGELOG.md preview:`);
+          console.log(
+            `   ${changelogData.changelogPreview.split("\n").join("\n   ")}`
+          );
+        }
+      }
+      console.log("");
     } else if (skipChangelog) {
       console.log("3️⃣  Skipping changelog generation (--skip-changelog)\n");
     } else {
@@ -73,7 +109,15 @@ async function main(): Promise<void> {
     const commitData = JSON.parse(commitResult);
     if (!dryRun && commitData.success && !commitData.skipped)
       completedSteps.push("commit");
-    console.log(`   ${dryRun ? "🔍 Would commit" : "✅ Committed"} changes\n`);
+    console.log(`   ${dryRun ? "🔍 Would commit" : "✅ Committed"} changes`);
+
+    if (dryRun && commitData.message) {
+      console.log(`   💬 Commit message: "${commitData.message}"`);
+      if (commitData.files) {
+        console.log(`   📁 Files to commit: ${commitData.files.join(", ")}`);
+      }
+    }
+    console.log("");
 
     // Step 5: Create git tag
     console.log("5️⃣  Creating git tag...");
@@ -83,8 +127,17 @@ async function main(): Promise<void> {
     const tagData = JSON.parse(tagResult);
     if (!dryRun && tagData.success) completedSteps.push("tag");
     console.log(
-      `   ${dryRun ? "🔍 Would create" : "✅ Created"} tag v${version}\n`
+      `   ${dryRun ? "🔍 Would create" : "✅ Created"} tag v${version}`
     );
+
+    if (dryRun && tagData.gitCommand) {
+      console.log(`   🏷️  Git command: ${tagData.gitCommand}`);
+      console.log(`   📝 Tag message: "${tagData.tagMessage}"`);
+      if (tagData.isPrerelease) {
+        console.log(`   🚧 This is a prerelease tag`);
+      }
+    }
+    console.log("");
 
     // Step 6: Publish to NPM (if not skipped)
     if (!skipNpm) {
@@ -94,9 +147,20 @@ async function main(): Promise<void> {
       );
       const npmData = JSON.parse(npmResult);
       if (!dryRun && npmData.success) completedSteps.push("npm");
-      console.log(
-        `   ${dryRun ? "🔍 Would publish" : "✅ Published"} to NPM\n`
-      );
+      console.log(`   ${dryRun ? "🔍 Would publish" : "✅ Published"} to NPM`);
+
+      if (dryRun && npmData.packageName) {
+        console.log(`   📦 Package: ${npmData.fullPackageName}`);
+        console.log(`   🏷️  NPM tag: ${npmData.tag}`);
+        console.log(`   🌐 Registry: ${npmData.registry}`);
+        console.log(
+          `   📄 Description: ${npmData.description || "No description"}`
+        );
+        console.log(`   📁 Files: ${npmData.files} files`);
+        console.log(`   📊 Size: ${npmData.size} bytes`);
+        console.log(`   🚀 Command: ${npmData.publishCommand}`);
+      }
+      console.log("");
     } else {
       console.log("6️⃣  Skipping NPM publish (--skip-npm)\n");
     }
@@ -110,8 +174,19 @@ async function main(): Promise<void> {
       const ghData = JSON.parse(ghResult);
       if (!dryRun && ghData.success) completedSteps.push("github-release");
       console.log(
-        `   ${dryRun ? "🔍 Would create" : "✅ Created"} GitHub release\n`
+        `   ${dryRun ? "🔍 Would create" : "✅ Created"} GitHub release`
       );
+
+      if (dryRun && ghData.releaseNotes) {
+        console.log(`   🏷️  Release tag: ${ghData.tag}`);
+        console.log(`   📦 Repository: ${ghData.repository}`);
+        if (ghData.prerelease) {
+          console.log(`   🚧 This is a prerelease`);
+        }
+        console.log(`\n   📝 Release notes that would be created:`);
+        console.log(`   ${ghData.releaseNotes.split("\n").join("\n   ")}`);
+      }
+      console.log("");
     } else {
       console.log("7️⃣  Skipping GitHub release (--skip-github)\n");
     }

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { exec } from "./release-lib.js";
+import { exec, execQuiet } from "./release-lib.js";
 import type { AnalysisResult } from "./types.js";
 
 function main(): void {
@@ -29,11 +29,8 @@ function main(): void {
 
   if (dryRun) {
     // Check if tag already exists
-    let tagExists = false;
-    try {
-      exec(`git rev-parse ${tag}`);
-      tagExists = true;
-    } catch {}
+    const tagExists = execQuiet(`git rev-parse ${tag}`) !== null;
+    const tagMessage = `Release ${analysis.version}`;
 
     console.log(
       JSON.stringify({
@@ -43,6 +40,9 @@ function main(): void {
         version: analysis.version,
         wouldCreate: !tagExists,
         alreadyExists: tagExists,
+        tagMessage,
+        gitCommand: `git tag -a ${tag} -m "${tagMessage}"`,
+        isPrerelease: analysis.isPrerelease || false,
       })
     );
     return;

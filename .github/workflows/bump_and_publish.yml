@@ -45,4 +45,4 @@ jobs:
         run: |
           # Run the main release script
           # The script handles all the orchestration internally
-          node release.js
+          npm run release
