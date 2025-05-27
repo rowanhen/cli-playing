@@ -365,9 +365,11 @@ export class ReleaseAutomation {
 
     if (!skipAuth) {
       // Check for NPM token (both in dry-run and real run)
-      if (!process.env.NPM_TOKEN) {
+      // Support both NODE_AUTH_TOKEN (GitHub Actions standard) and NPM_TOKEN (fallback)
+      const npmToken = process.env.NODE_AUTH_TOKEN || process.env.NPM_TOKEN;
+      if (!npmToken) {
         throw new Error(
-          "NPM authentication token not found. Set NPM_TOKEN environment variable."
+          "NPM authentication token not found. Set NODE_AUTH_TOKEN or NPM_TOKEN environment variable."
         );
       }
 

@@ -210,7 +210,7 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: npx @super-secret-test-org/simple-versioning
 ```
@@ -244,16 +244,19 @@ jobs:
 
 ## Environment Variables
 
-| Variable            | Description                        | Required            |
-| ------------------- | ---------------------------------- | ------------------- |
-| `GITHUB_TOKEN`      | GitHub token for creating releases | For GitHub releases |
-| `NPM_TOKEN`         | NPM token for publishing           | For NPM publishing  |
-| `GITHUB_REPOSITORY` | Repository in format `owner/repo`  | For GitHub releases |
+| Variable            | Description                                        | Required            |
+| ------------------- | -------------------------------------------------- | ------------------- |
+| `GITHUB_TOKEN`      | GitHub token for creating releases                 | For GitHub releases |
+| `NODE_AUTH_TOKEN`   | NPM token for publishing (GitHub Actions standard) | For NPM publishing  |
+| `NPM_TOKEN`         | NPM token for publishing (fallback)                | For NPM publishing  |
+| `GITHUB_REPOSITORY` | Repository in format `owner/repo`                  | For GitHub releases |
 
 **Required Secrets:**
 
 - `GH_TOKEN`: Personal Access Token with `repo` and `write:packages` permissions
 - `NPM_TOKEN`: NPM authentication token for publishing
+
+**Note:** When using GitHub Actions with `setup-node` and `registry-url`, use `NODE_AUTH_TOKEN` as the environment variable name. The package also supports `NPM_TOKEN` as a fallback for other CI environments.
 
 ## Conventional Commits
 
