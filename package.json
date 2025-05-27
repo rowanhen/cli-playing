@@ -29,14 +29,9 @@
     "build": "tsc",
     "prepublishOnly": "npm run build",
     "test": "test",
-    "release": "tsx scripts/release.ts",
-    "release:dry-run": "tsx scripts/release.ts --dry-run",
-    "bump-version": "tsx scripts/bump-version.ts",
-    "commit-changes": "tsx scripts/commit-changes.ts",
-    "create-tag": "tsx scripts/create-tag.ts",
-    "generate-changelog": "tsx scripts/generate-changelog.ts",
-    "publish-npm": "tsx scripts/publish-npm.ts",
-    "create-github-release": "tsx scripts/create-github-release.ts",
+    "release": "node dist/cli.js",
+    "release:dry-run": "node dist/cli.js --dry-run",
+    "analyze": "node dist/cli.js analyze",
     "type-check": "tsc --noEmit"
   },
   "keywords": [
