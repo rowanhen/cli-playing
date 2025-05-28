@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.2] - 2025-05-28
+
+### 🧹 Chores
+
+- cleaning up repo config.ts file to not include helpers ([b9df2fa](https://github.com/rowanhen/simple-versioning/commit/b9df2facbfdcb43b3998e2c35bb8ac6c08af4581))
+
 ## [1.4.1] - 2025-05-28
 
 ### 🐛 Bug Fixes
