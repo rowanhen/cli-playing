@@ -1,9 +1,4 @@
-import type {
-  CommitTypeConfig,
-  Config,
-  ExtractCommitTypes,
-  ExtractSectionNames,
-} from "./types.js";
+import type { CommitTypeConfig, Config } from "./types.js";
 
 // Define the commit types configuration with proper typing
 const COMMIT_TYPES = {
@@ -59,34 +54,13 @@ export const CONFIG: Config<typeof COMMIT_TYPES> = {
     sections: {
       Features: "🚀 Features", // ✅ Valid - "Features" is defined in feat type
       "Bug Fixes": "🐛 Bug Fixes", // ✅ Valid - "Bug Fixes" is defined in fix type
+      "Performance Improvements": "🏎️ Performance Improvements", // ✅ Valid - "Performance Improvements" is defined in perf type
+      Styles: "🎨 Styles", // ✅ Valid - "Styles" is defined in style type
+      Refactors: "🔄 Refactors", // ✅ Valid - "Refactors" is defined in refactor type
       Documentation: "📚 Documentation", // ✅ Valid - "Documentation" is defined in docs type
       "Breaking Changes": "💥 BREAKING CHANGES", // ✅ Valid - always allowed
+      Chores: "🧹 Chores", // ✅ Valid - "Chore" is defined in chore type
       // "Invalid Section": "❌ Invalid", // ❌ This would cause a TypeScript error
     },
   },
 };
-
-// Export the inferred types for use in other modules - now derived from CONFIG
-export type ConfigCommitTypes = ExtractCommitTypes<typeof CONFIG>; // "feat" | "fix" | "docs" | etc.
-export type ConfigSectionNames = ExtractSectionNames<(typeof CONFIG)["types"]>; // "Features" | "Bug Fixes" | etc.
-
-// Helper to validate that a string is a valid commit type from our config
-export function isValidCommitType(type: string): type is ConfigCommitTypes {
-  return type in CONFIG.types;
-}
-
-// Helper to get all valid commit types from the config
-export function getValidCommitTypes(): ConfigCommitTypes[] {
-  return Object.keys(CONFIG.types) as ConfigCommitTypes[];
-}
-
-// Helper to get all section names from the config
-export function getValidSectionNames(): string[] {
-  const sections: string[] = [];
-  for (const config of Object.values(CONFIG.types)) {
-    if ("section" in config && config.section) {
-      sections.push(config.section);
-    }
-  }
-  return sections;
-}

@@ -25,6 +25,11 @@ export {
   parseCommit,
 } from "./utils/commit-parser.js";
 export {
+  getValidCommitTypes,
+  getValidSectionNames,
+  isValidCommitType,
+} from "./utils/config-helpers.js";
+export {
   formatChangelogEntry,
   formatReleaseNotes,
 } from "./utils/formatting.js";
