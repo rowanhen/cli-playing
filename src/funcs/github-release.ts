@@ -1,26 +1,40 @@
-import type { AnalysisResult, ReleaseStepResult } from "../types.js";
+import type {
+  AnalysisResult,
+  MarkdownConfig,
+  ReleaseStepResult,
+} from "../types.js";
 import { formatReleaseNotes } from "../utils/formatting.js";
 import { getRepositoryInfo } from "./repository-utils.js";
 
 /**
- * Create GitHub release
+ * Create GitHub release with type-safe markdown configuration
  */
-export async function createGithubRelease(
+export async function createGithubRelease<TSections extends string = string>(
   analysis: AnalysisResult,
   dryRun = false,
-  skipAuth = false
+  skipAuth = false,
+  markdownConfig?: MarkdownConfig<TSections>
 ): Promise<ReleaseStepResult> {
   if (analysis.error) {
     throw new Error(analysis.error);
   }
 
   const tag = `v${analysis.version}`;
-  const releaseNotes = formatReleaseNotes(analysis.changes);
 
   // Get repository info from git remote or environment
   const repoInfo = getRepositoryInfo();
   const repository =
     process.env.GITHUB_REPOSITORY || repoInfo?.fullName || "unknown";
+  const repoForLinks = repoInfo
+    ? { owner: repoInfo.owner, repo: repoInfo.repo }
+    : undefined;
+
+  const releaseNotes = formatReleaseNotes(
+    analysis.changes,
+    markdownConfig,
+    analysis.commitMeta,
+    repoForLinks
+  );
 
   // Skip authentication checks if skipAuth is true and we're in dry-run mode
   let authValidation = { valid: false, error: "" };

@@ -14,9 +14,6 @@ yalc.lock
 /dist
 *.tsbuildinfo
 
-# docs
-/docs
-
 # misc
 .DS_Store
 .env.local
@@ -203,3 +200,10 @@ playwright/.auth/*
 
 # Sentry
 .env.sentry-build-plugin
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Vitest
+.vitest/

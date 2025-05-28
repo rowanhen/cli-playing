@@ -1,13 +1,19 @@
 import { existsSync, readFileSync, writeFileSync } from "fs";
-import type { AnalysisResult, ReleaseStepResult } from "../types.js";
+import type {
+  AnalysisResult,
+  MarkdownConfig,
+  ReleaseStepResult,
+} from "../types.js";
 import { formatChangelogEntry } from "../utils/formatting.js";
+import { getRepositoryInfo } from "./repository-utils.js";
 
 /**
- * Generate changelog entry
+ * Generate changelog entry with type-safe markdown configuration
  */
-export async function generateChangelog(
+export async function generateChangelog<TSections extends string = string>(
   analysis: AnalysisResult,
-  dryRun = false
+  dryRun = false,
+  markdownConfig?: MarkdownConfig<TSections>
 ): Promise<ReleaseStepResult> {
   if (analysis.error) {
     throw new Error(analysis.error);
@@ -29,8 +35,20 @@ export async function generateChangelog(
     changelog = readFileSync("CHANGELOG.md", "utf8");
   }
 
-  // Generate new entry
-  const newEntry = formatChangelogEntry(analysis.version, analysis.changes);
+  // Get repository info for linking
+  const repoInfo = getRepositoryInfo();
+  const repoForLinks = repoInfo
+    ? { owner: repoInfo.owner, repo: repoInfo.repo }
+    : undefined;
+
+  // Generate new entry with custom markdown config and links
+  const newEntry = formatChangelogEntry(
+    analysis.version,
+    analysis.changes,
+    markdownConfig,
+    analysis.commitMeta,
+    repoForLinks
+  );
 
   // Find the right place to insert the new entry
   const lines = changelog.split("\n");

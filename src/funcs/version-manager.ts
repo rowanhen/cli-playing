@@ -1,7 +1,8 @@
+import { CONFIG } from "../config.js";
 import type { AnalysisResult, ReleaseStepResult } from "../types.js";
 import { analyzeCommits } from "../utils/commit-parser.js";
 import {
-  getCommitsSinceLastTag,
+  getCommitsWithHashesSinceLastTag,
   getCurrentBranch,
   getPrereleaseTag,
   isBranchAllowed,
@@ -31,8 +32,8 @@ export async function analyzeCommitsForRelease(): Promise<AnalysisResult> {
       };
     }
 
-    // Get commits since last tag
-    const commits = getCommitsSinceLastTag();
+    // Get commits since last tag with hashes
+    const commits = getCommitsWithHashesSinceLastTag();
     if (commits.length === 0) {
       return {
         error: "No commits found since last tag",
@@ -44,8 +45,8 @@ export async function analyzeCommitsForRelease(): Promise<AnalysisResult> {
       };
     }
 
-    // Analyze commits
-    const analysis = analyzeCommits(commits);
+    // Analyze commits with metadata for linking
+    const analysis = analyzeCommits(commits, CONFIG, CONFIG.breakingKeywords);
 
     // Determine if this is a prerelease
     const prereleaseTag = getPrereleaseTag(currentBranch);
@@ -64,7 +65,7 @@ export async function analyzeCommitsForRelease(): Promise<AnalysisResult> {
     // Extract commit subjects for detailed output
     const commitSubjects = commits
       .map((commit) => {
-        const lines = commit.trim().split("\n");
+        const lines = commit.message.trim().split("\n");
         return lines[0] || "";
       })
       .filter((subject) => subject.trim());
@@ -82,6 +83,8 @@ export async function analyzeCommitsForRelease(): Promise<AnalysisResult> {
       commitCount: commits.length,
       commitSubjects,
       prereleaseTag,
+      // Store commit metadata for linking
+      commitMeta: analysis.commitMeta,
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);

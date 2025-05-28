@@ -6,16 +6,58 @@ export interface CommitTypeConfig {
   hidden?: boolean;
 }
 
-export interface Config {
-  types: Record<string, CommitTypeConfig>;
-  hiddenScopes: Record<string, string[]>;
+// Extract section names from commit type configs for better type safety
+export type ExtractSectionNames<T extends Record<string, CommitTypeConfig>> = {
+  [K in keyof T]: T[K]["section"] extends string ? T[K]["section"] : never;
+}[keyof T];
+
+// Extract commit type names from config
+export type ExtractCommitTypes<T extends Config> = keyof T["types"];
+
+export interface MarkdownConfig<TSections extends string = string> {
+  changelog: {
+    versionHeader: string; // Template: "## [{version}] - {date}"
+    sectionHeader: string; // Template: "### {section}"
+    listItem: string; // Template: "- {item}"
+    dateFormat: string; // ISO format or custom
+  };
+  releaseNotes: {
+    sectionHeader: string; // Template: "### {section}"
+    listItem: string; // Template: "- {item}"
+  };
+  // Constrain sections to only valid section names from commit types
+  sections: Partial<Record<TSections | "Breaking Changes", string>>;
+}
+
+// Improved Config interface with better type relationships
+export interface Config<
+  TTypes extends Record<string, CommitTypeConfig> = Record<
+    string,
+    CommitTypeConfig
+  >
+> {
+  types: TTypes;
+  // Constrain hiddenScopes keys to only valid commit types
+  hiddenScopes: Partial<Record<keyof TTypes, string[]>>;
   breakingKeywords: string[];
   branches: {
     main: string;
     prereleasePattern: RegExp;
     prereleasePrefix: string;
   };
+  // Constrain markdown sections to only valid section names from types
+  markdown?: MarkdownConfig<ExtractSectionNames<TTypes>>;
 }
+
+// Helper type to validate that all section names in markdown.sections
+// correspond to actual sections defined in commit types
+export type ValidateConfig<T extends Config> = T extends Config<infer TTypes>
+  ? T["markdown"] extends MarkdownConfig<infer TSections>
+    ? TSections extends ExtractSectionNames<TTypes> | "Breaking Changes"
+      ? T
+      : never
+    : T
+  : never;
 
 export interface ParsedCommit {
   type: string;
@@ -23,6 +65,8 @@ export interface ParsedCommit {
   description: string;
   breaking: boolean;
   body: string;
+  hash?: string; // Commit hash
+  prNumber?: string; // PR number if available
 }
 
 export interface CommitAnalysisResult {
@@ -46,6 +90,8 @@ export interface AnalysisResult {
   commitCount?: number;
   commitSubjects?: string[];
   prereleaseTag?: string | null;
+  // Commit metadata for linking
+  commitMeta?: Record<string, { hash?: string; prNumber?: string }>;
 }
 
 export interface PackageJson {

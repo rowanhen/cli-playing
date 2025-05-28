@@ -1,39 +1,44 @@
-import { CONFIG } from "../config.js";
-import type { CommitAnalysisResult, ParsedCommit } from "../types.js";
+import type { CommitAnalysisResult, Config, ParsedCommit } from "../types.js";
+import type { CommitInfo } from "./git.js";
 
 // Commit parsing and analysis utilities
 
-// Parse conventional commit
-export function parseCommit(commit: string): ParsedCommit | null {
-  // Split into subject (first line) and body
-  const lines = commit.trim().split("\n");
-  const subject = lines[0];
-  if (!subject) return null;
+/**
+ * Parse a conventional commit message
+ */
+export function parseCommit(message: string, hash?: string): ParsedCommit {
+  // Extract PR number from commit message (GitHub squash merge format)
+  const prMatch = message.match(/\(#(\d+)\)$/);
+  const prNumber = prMatch ? prMatch[1] : undefined;
 
-  const body = lines.slice(1).join("\n").trim();
+  // Clean the message by removing the PR number for parsing
+  const cleanMessage = prNumber ? message.replace(/\s*\(#\d+\)$/, "") : message;
 
-  // Try to parse the subject line
-  const match = subject.match(/^(\w+)(?:\(([^)]+)\))?(!)?: (.+)/);
-  if (!match) return null;
+  // Parse conventional commit format: type(scope): description
+  const match = cleanMessage.match(/^(\w+)(?:\(([^)]+)\))?: (.+)$/);
 
-  const [, type, scope, breakingIndicator, description] = match;
-  if (!type || !description) return null;
+  if (!match) {
+    return {
+      type: "unknown",
+      description: cleanMessage,
+      breaking: false,
+      body: "",
+      hash,
+      prNumber,
+    };
+  }
 
-  // Check for breaking changes in multiple places:
-  // 1. Exclamation mark in subject (feat!: ...)
-  // 2. Breaking change keywords in body
-  // 3. PR title format: "feat: description (#123)" with breaking change in PR body
-  const breaking =
-    !!breakingIndicator ||
-    CONFIG.breakingKeywords.some((keyword) =>
-      body.toUpperCase().includes(keyword.toUpperCase())
-    );
+  const [, type, scope, description] = match;
 
-  // For squash merges, GitHub often adds PR number to subject
-  // Extract clean description without PR reference
-  const cleanDescription = description.replace(/\s*\(#\d+\)$/, "");
-
-  return { type, scope, description: cleanDescription, breaking, body };
+  return {
+    type: type || "unknown",
+    scope,
+    description: description || "",
+    breaking: false, // Will be determined by keywords later
+    body: "",
+    hash,
+    prNumber,
+  };
 }
 
 // Helper function to identify release commits
@@ -58,84 +63,86 @@ export function isReleaseCommit(commit: string): boolean {
   return releasePatterns.some((pattern) => pattern.test(subject));
 }
 
-// Analyze commits and determine version bump
-export function analyzeCommits(commits: string[]): CommitAnalysisResult {
-  let bump: "major" | "minor" | "patch" | null = null;
+/**
+ * Analyze commits and categorize them based on configuration
+ */
+export function analyzeCommits(
+  commits: CommitInfo[],
+  config: Config,
+  breakingKeywords: string[] = []
+): CommitAnalysisResult & {
+  commitMeta: Record<string, { hash?: string; prNumber?: string }>;
+} {
   const changes: Record<string, string[]> = {};
-  let hasHiddenChanges = false;
+  const commitMeta: Record<string, { hash?: string; prNumber?: string }> = {};
+  let bump: "major" | "minor" | "patch" = "patch";
+  let hasVisibleChanges = false;
 
-  for (const commit of commits) {
-    // Skip release commits to prevent infinite loops
-    if (isReleaseCommit(commit)) {
+  for (const commitInfo of commits) {
+    const parsed = parseCommit(commitInfo.message, commitInfo.hash);
+
+    // Check for breaking changes
+    const isBreaking = breakingKeywords.some((keyword) =>
+      commitInfo.message.includes(keyword)
+    );
+
+    if (isBreaking) {
+      parsed.breaking = true;
+      bump = "major";
+    }
+
+    // Get commit type configuration
+    const typeConfig = config.types[parsed.type];
+
+    if (!typeConfig) {
+      // Unknown commit type - treat as patch
       continue;
     }
 
-    const parsed = parseCommit(commit);
-    if (!parsed) continue;
-
-    // Handle breaking changes
-    if (parsed.breaking) {
-      bump = "major";
-      changes["Breaking Changes"] = changes["Breaking Changes"] || [];
-      changes["Breaking Changes"].push(parsed.description);
-
-      // If there's a body with breaking change details, include it
-      if (
-        parsed.body &&
-        CONFIG.breakingKeywords.some((kw) =>
-          parsed.body.toUpperCase().includes(kw.toUpperCase())
-        )
-      ) {
-        const breakingDetails = parsed.body
-          .split("\n")
-          .filter((line) => line.trim())
-          .find((line) =>
-            CONFIG.breakingKeywords.some((kw) =>
-              line.toUpperCase().includes(kw.toUpperCase())
-            )
-          );
-
-        if (breakingDetails) {
-          const detail = breakingDetails
-            .replace(/BREAKING[\s-]CHANGE[S]?:?\s*/i, "")
-            .trim();
-          if (detail) {
-            changes["Breaking Changes"].push(`Details: ${detail}`);
-          }
-        }
-      }
+    // Update bump level
+    if (typeConfig.bump === "minor" && bump !== "major") {
+      bump = "minor";
     }
 
-    // Handle regular commit types
-    const config = CONFIG.types[parsed.type];
-    if (config) {
-      // Update bump type
-      if (!bump || (bump === "patch" && config.bump === "minor")) {
-        bump = config.bump;
-      }
-
-      // Check if this commit should be hidden
-      const hiddenScopes = CONFIG.hiddenScopes[parsed.type];
-      const isHidden =
-        config.hidden ||
-        (hiddenScopes && parsed.scope && hiddenScopes.includes(parsed.scope));
-
-      // Only add to changelog if not hidden and has section
-      if (!isHidden && config.section) {
-        changes[config.section] = changes[config.section] || [];
-        const sectionArray = changes[config.section];
-        if (sectionArray) {
-          sectionArray.push(parsed.description);
-        }
-      } else {
-        hasHiddenChanges = true;
-      }
+    // Skip hidden types for changelog
+    if (typeConfig.hidden) {
+      continue;
     }
+
+    // Check if this commit should be hidden based on scope
+    const hiddenScopes = config.hiddenScopes[parsed.type];
+    if (hiddenScopes && parsed.scope && hiddenScopes.includes(parsed.scope)) {
+      continue;
+    }
+
+    hasVisibleChanges = true;
+
+    // Add to appropriate section
+    const section = isBreaking
+      ? "Breaking Changes"
+      : typeConfig.section || parsed.type;
+
+    if (!changes[section]) {
+      changes[section] = [];
+    }
+
+    const changeDescription = parsed.scope
+      ? `${parsed.description} (${parsed.scope})`
+      : parsed.description;
+
+    changes[section].push(changeDescription);
+
+    // Store commit metadata for linking
+    commitMeta[changeDescription] = {
+      hash: parsed.hash,
+      prNumber: parsed.prNumber,
+    };
   }
 
   return {
-    bump: bump || "patch",
+    bump,
     changes,
-    hasOnlyHiddenChanges: Object.keys(changes).length === 0 && hasHiddenChanges,
+    hasOnlyHiddenChanges: !hasVisibleChanges,
+    commitMeta,
   };
 }

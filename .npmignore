@@ -9,9 +9,9 @@ tsconfig.json
 !*.d.ts
 
 # Test files
-test/
-tests/
-__tests__/
+src/test/
+src/tests/
+src/__tests__/
 *.test.*
 *.spec.*
 

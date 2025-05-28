@@ -1,27 +1,24 @@
 // Main exports for programmatic usage
-export { ReleaseOrchestrator } from "./funcs/release-orchestrator.js";
-export * from "./types.js";
+export { generateChangelog } from "./funcs/changelog-generator.js";
+export { createGithubRelease } from "./funcs/github-release.js";
+export { publishNpm } from "./funcs/npm-publisher.js";
+export { getRepositoryInfo } from "./funcs/repository-utils.js";
+export {
+  analyzeCommitsForRelease,
+  bumpPackageVersion,
+} from "./funcs/version-manager.js";
 
-// Re-export modular components
-export * from "./funcs/changelog-generator.js";
-export * from "./funcs/git-operations.js";
-export * from "./funcs/github-release.js";
-export * from "./funcs/npm-publisher.js";
-export * from "./funcs/release-orchestrator.js";
-export * from "./funcs/repository-utils.js";
-export * from "./funcs/version-manager.js";
+// Re-export modular components for advanced usage
+export { CONFIG } from "./config.js";
+export type {
+  AnalysisResult,
+  CommitTypeConfig,
+  Config,
+  ReleaseOptions,
+  ReleaseStepResult,
+} from "./types.js";
 
-// Re-export utilities
-export * from "./config.js";
-export * from "./utils/commit-parser.js";
-export * from "./utils/formatting.js";
-export * from "./utils/git.js";
-export * from "./utils/package.js";
-export * from "./utils/shell.js";
-export * from "./utils/version.js";
-
-// Re-export individual functions for convenience
-export { CONFIG as defaultConfig } from "./config.js";
+// Utilities
 export {
   analyzeCommits,
   isReleaseCommit,
@@ -32,11 +29,12 @@ export {
   formatReleaseNotes,
 } from "./utils/formatting.js";
 export {
-  getCommitsSinceLastTag,
+  getCommitsWithHashesSinceLastTag,
   getCurrentBranch,
   getPrereleaseTag,
   isBranchAllowed,
 } from "./utils/git.js";
+export type { CommitInfo } from "./utils/git.js";
 export { getPackageJson, savePackageJson } from "./utils/package.js";
 export { exec, execQuiet } from "./utils/shell.js";
 export { bumpVersion } from "./utils/version.js";

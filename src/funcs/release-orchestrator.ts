@@ -45,7 +45,7 @@ export class ReleaseOrchestrator {
     analysis: AnalysisResult,
     dryRun = false
   ): Promise<ReleaseStepResult> {
-    return generateChangelog(analysis, dryRun);
+    return generateChangelog(analysis, dryRun, this.config.markdown);
   }
 
   /**
@@ -87,7 +87,12 @@ export class ReleaseOrchestrator {
     dryRun = false,
     skipAuth = false
   ): Promise<ReleaseStepResult> {
-    return createGithubRelease(analysis, dryRun, skipAuth);
+    return createGithubRelease(
+      analysis,
+      dryRun,
+      skipAuth,
+      this.config.markdown
+    );
   }
 
   /**

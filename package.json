@@ -30,6 +30,7 @@
     "prepublishOnly": "npm run build",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:watch": "vitest --watch",
     "test:coverage": "vitest run --coverage",
     "release": "node dist/cli.js",
     "release:dry-run": "node dist/cli.js --dry-run",
@@ -48,7 +49,7 @@
     "ci-cd"
   ],
   "author": "Rowan Henseleit",
-  "license": "ISC",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/rowanhen/simple-versioning.git"
