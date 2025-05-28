@@ -1,6 +1,6 @@
 import { CONFIG } from "../config.js";
 import type { AnalysisResult, ReleaseStepResult } from "../types.js";
-import { analyzeCommits } from "../utils/commit-parser.js";
+import { analyzeCommits, isReleaseCommit } from "../utils/commit-parser.js";
 import {
   getCommitsWithHashesSinceLastTag,
   getCurrentBranch,
@@ -33,10 +33,26 @@ export async function analyzeCommitsForRelease(): Promise<AnalysisResult> {
     }
 
     // Get commits since last tag with hashes
-    const commits = getCommitsWithHashesSinceLastTag();
-    if (commits.length === 0) {
+    const allCommits = getCommitsWithHashesSinceLastTag();
+    if (allCommits.length === 0) {
       return {
         error: "No commits found since last tag",
+        bump: "patch",
+        version: currentVersion,
+        currentVersion,
+        hasChanges: false,
+        changes: {},
+      };
+    }
+
+    // Filter out release commits before analyzing
+    const commits = allCommits.filter(
+      (commit) => !isReleaseCommit(commit.message)
+    );
+
+    if (commits.length === 0) {
+      return {
+        error: "No non-release commits found since last tag",
         bump: "patch",
         version: currentVersion,
         currentVersion,
@@ -62,7 +78,7 @@ export async function analyzeCommitsForRelease(): Promise<AnalysisResult> {
     // Determine if there are visible changes
     const hasChanges = Object.keys(analysis.changes).length > 0;
 
-    // Extract commit subjects for detailed output
+    // Extract commit subjects for detailed output (from filtered commits)
     const commitSubjects = commits
       .map((commit) => {
         const lines = commit.message.trim().split("\n");
