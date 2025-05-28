@@ -8,6 +8,7 @@ import {
   isBranchAllowed,
 } from "../utils/git.js";
 import { getPackageJson, savePackageJson } from "../utils/package.js";
+import { exec } from "../utils/shell.js";
 import { bumpVersion } from "../utils/version.js";
 
 /**
@@ -132,6 +133,21 @@ export async function bumpPackageVersion(
   if (!dryRun) {
     pkg.version = analysis.version;
     savePackageJson(pkg);
+
+    // Update package-lock.json by running npm install
+    // This ensures the package-lock.json version matches package.json
+    try {
+      exec("npm install --package-lock-only");
+    } catch (error) {
+      // If npm install fails, try without the flag (fallback for older npm versions)
+      try {
+        exec("npm install --no-save");
+      } catch (fallbackError) {
+        console.warn(
+          "Warning: Could not update package-lock.json automatically"
+        );
+      }
+    }
   }
 
   return {
