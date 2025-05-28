@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2025-05-28
+
+### 🐛 Bug Fixes
+
+- dry-run workflow to use correct npmrc ([cbd3e6a](https://github.com/rowanhen/simple-versioning/commit/cbd3e6af547e79f17d3d28f8906963aeff09c482))
+- update vitest config to find test files in src/tests directory ([f9dc96c](https://github.com/rowanhen/simple-versioning/commit/f9dc96c15d228250b001ecc5138b6cf6446c09fd))
+
+### Chores
+
+- 1.3.3 [skip ci] (release) ([3c265bd](https://github.com/rowanhen/simple-versioning/commit/3c265bda739f72c447b050252f2fe1b8fce86c56))
+- 1.3.2 [skip ci] (release) ([85f61c5](https://github.com/rowanhen/simple-versioning/commit/85f61c565cace803fd5ce68fa03582b75ee2ff70))
+- 1.3.1 [skip ci] (release) ([6ddb90a](https://github.com/rowanhen/simple-versioning/commit/6ddb90a5cd543e1762dbf67065818ae696fb159a))
+
+### 🚀 Features
+
+- clearer README and documentation, adding test files ([6fa2ea6](https://github.com/rowanhen/simple-versioning/commit/6fa2ea692989010fb853f25884a8dd2801e3b875))
+
 ## [1.3.0] - 2025-05-27
 
 ### Features
