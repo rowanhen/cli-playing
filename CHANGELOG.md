@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.1] - 2025-05-28
+
+### 🐛 Bug Fixes
+
+- update package-lock.json version during release process - Add npm install --package-lock-only after updating package.json version - Ensures package-lock.json version stays in sync with package.json - Includes fallback to npm install --no-save for older npm versions - Fixes issue where package-lock.json version was outdated in release commits ([dbb458d](https://github.com/rowanhen/simple-versioning/commit/dbb458df2ccd64d1ce15bf8d59d2a0a7877c33a6))
+
 ## [1.4.0] - 2025-05-28
 
 ### 🐛 Bug Fixes
